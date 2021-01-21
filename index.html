@@ -59,7 +59,8 @@ loader.load('scene.gltf', function(gltf){
   scene.add(gltf.scene);
   animate();
 });
-      
+      let controls = new THREE.OrbitControls(camera);
+controls.addEventListener('change', renderer);
       
     </script>
   </body>
