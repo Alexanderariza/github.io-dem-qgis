@@ -1,412 +1,318 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html><html lang="en"><head><title>harp.gl</title><link rel="preload" href="./decoder.bundle.js" as="worker"><link rel="preload" href="./index.bundle.js" as="script"><link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="shortcut icon" href="resources/favicon.ico"><script src="three.min.js" defer="defer"></script><meta name="twitter:card" content="summary"/><meta name="twitter:site" content="@here"/><meta name="twitter:title" content="harp.gl"/><meta name="twitter:description" content="3d web map rendering engine"/><meta name="twitter:image" content="https://www.harp.gl/resources/background.jpg"/><meta property="og:url" content="https://www.harp.gl"/><meta property="og:type" content="website"/><meta property="og:title" content="harp.gl"/><meta property="og:description" content="3d web map rendering engine"/><meta property="og:image" content="https://www.harp.gl/resources/background.jpg"/><script defer="defer" src="index.bundle.js"></script><style type="text/css">:root {
+   --dark-text: #3f454d;
+   --section-padding: 100px 0;
+   --background: #1b222c;
+   --gradient: linear-gradient(to bottom right,#e7e1a0,#85e0ce);
+   --grid-gap: 50px;
+   --teal: #58d7be;
+   --header-height: 500px;
+ }
 
-    <head>
-        <title>harp.gl | examples</title>
-        <meta charset="utf-8" />
-        <meta name="viewport"
-            content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600&amp;display=swap"
-            rel="stylesheet">
-        <style>
-            :root {
-                /* COLOURS */
-                /* Color1: background color. */
-                --color1-hue: 218;
-                --color1-saturation: 17%;
+html, body {
+   border: 0;
+   padding: 0;
+   margin: 0;
+   font-family: 'Fira Sans', sans-serif;
+   color: var(--dark-text);
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
+   background: #f8f8f8;
+}
 
-                /* Graceful gradients. */
-                --gradient: linear-gradient(to bottom right, #e7e1a0, #85e0ce);
+/* Main */
 
-                /* Luminosity shades */
-                --dark: 18%;
-                /* MapControlsUI background's luminosity. */
-                --soft: 45%;
-                --light: 65%;
-                --bright: 85%;
-                /* MapControlsUI text's luminosity. */
+h1, h2 {
+   font-weight: 500;
+}
 
-                --intermediate: 55%;
-                /* For the title, if colour2 is used. */
+h1 {
+   font-size: 28px;
+}
 
-                /* LAYOUT */
-                --headers-height: 65px;
-                --margin: 15px;
-                --nav-width: 310px;
-            }
+h2 {
+   font-size: 24px;
+}
 
-            html {
-                height: 100%;
-            }
+p {
+   font-size: 16px;
+   line-height: 24px;
+   color: white;
+   margin: 0;
+}
 
-            body {
-                margin: 0;
-                height: 100%;
-                font-size: 17px;
-                line-height: 18px;
-                font-family: 'Fira Sans', sans-serif;
-            }
+.container {
+   max-width: 1100px;
+   margin: auto auto;
+   padding: 0 40px;
+}
 
-            a {
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-            }
+/* Header and Nav */
 
-            a:visited {
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--bright))
-            }
+header {
+   width: 100%;
+   height: var(--header-height);
+   background: var(--background);
+   background-image: url(../bd623eaadd0499621a916830c136edf8.jpg);
+   background-size: cover;
+   background-repeat: no-repeat;
+   background-position: center;
+   box-sizing: border-box;
+   position: relative;
+   /* transition: .3s background-image ease-in-out; */
+}
 
-            #navPanel {
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-                position: fixed;
-                z-index: 1;
-                left: 0px;
-                width: var(--nav-width);
-                height: 100%;
-                max-height: 100%;
-                transition: all 250ms ease;
-            }
+.header-container {
+   display: flex;
+   box-sizing: border-box;
+   height: 100%;
+   flex-direction: column;
+}
 
-            #navPanel {
-                left: calc(var(--nav-width) * -1);
-            }
+#map {
+   position: absolute;
+   height: var(--header-height);
+   width: 100%;
+   border: 0;
+   pointer-events: none;
+   opacity: 0;
+   transition: opacity .5s ease-in-out;
+}
 
-            #navPanel.collapsed {
-                left: 0px;
-            }
 
-            #titleBar {
-                height: var(--headers-height);
-            }
+nav {
+   display: flex;
+   justify-content: space-between;
+   padding: 25px 0;
+   z-index: 1;
+   animation-name: feature-animation;
+   animation-duration: 1s;
+}
 
-            #github path {
-                fill: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-            }
+nav .nav-item {
+   margin-left: 25px;
+   color: white;
+   text-decoration: none;
+   transition: .1s all;
+   font-weight: 400;
+   font-size: 14px;
+   text-transform: uppercase;
+}
 
-            #github:hover path {
-                fill: hsl(var(--color1-hue), var(--color1-saturation), var(--light));
-            }
+#docs-nav-mobile {
+   display: none;
+}
 
-            #documentation path {
-                fill: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-                stroke: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-            }
+.header-content {
+   height: var(--header-height);
+   position: absolute;
+   display: flex;
+   justify-content: center;
+   flex-direction: column;
+}
 
-            #documentation:hover path {
-                fill: hsl(var(--color1-hue), var(--color1-saturation), var(--light));
-                stroke: hsl(var(--color1-hue), var(--color1-saturation), var(--light));
-            }
+.header-title {
+   color: white;
+   font-size: 52px;
+   font-weight: 600;
+   margin-bottom: 20px;
+   animation-name: lead-animation;
+   animation-duration: 2s;
+}
 
-            #navPanel h1 {
-                margin: 0;
-                font-size: 25px;
-                color: hsla(var(--color2-hue), var(--color2-saturation), var(--intermediate), 1);
-                position: absolute;
-                top: 24px;
-                left: var(--margin);
-                padding: 5px 0;
-                margin-top: -5px;
-                background: var(--gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
+.header-desc {
+   color: white;
+   font-weight: 400;
+   font-size: 20px;
+   animation-name: lead-animation;
+   animation-delay: 0.5s;
+   animation-duration: 2s;
+   animation-fill-mode: forwards;
+   opacity: 0;
+}
 
-            #documentation,
-            #github,
-            #closeButton {
-                position: absolute;
-                top: 20px;
-                height: 20px
-            }
+/* Features row */
 
-            #closeButton {
-                right: 15px;
-                outline: none;
-                background: none;
-                border: none;
-                cursor: pointer;
-                width: 25px;
-                height: 25px
-            }
+.features {
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr;
+   grid-gap: var(--grid-gap);
+   margin: var(--section-padding);
+}
 
-            #closeButton span:nth-child(1) {
-                left: 0;
-                margin-top: -2px;
-                transform: rotateZ(45deg);
-            }
+.feature {
+   text-align: center;
+}
 
-            #closeButton span:nth-child(2) {
-                left: 0;
-                margin-top: -2px;
-                transform: rotateZ(-45deg);
-            }
+.subtitle {
+   font-size: 16px;
+   font-weight: 400;
+   line-height: 24px;
+   color: #5F5F5F;
+}
 
-            #documentation {
-                right: 50px;
-            }
+.material-icons {
+   padding: 10px;
+   font-size: 40px;
+}
 
-            #github {
-                right: 85px;
-            }
 
-            #exampleFrame {
-                position: absolute;
-                border: 0px;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-            }
+/* Examples and Documentation */
 
-            /*
-            * Example list
-            */
-            #exampleList {
-                padding: calc(var(--margin) + 19px) 0;
-                padding-bottom: calc(var(--margin) + 19px);
-                overflow: auto;
-                position: absolute;
-                top: calc(2 * var(--headers-height));
-                bottom: 0;
-                width: 100%;
-                height: calc(100% - 3 * var(--headers-height));
-            }
+.links {
+   padding: var(--section-padding);
+   background: var(--background);
 
-            #exampleList div {
-                width: 100%;
-            }
+}
 
-            #exampleList div h2 {
-                margin: var(--margin);
-                margin-bottom: calc(var(--headers-height)/3 - 9px);
-                margin-top: calc(2 * var(--headers-height)/3 - 9px);
-                font-size: 16px;
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-                text-transform: uppercase;
-                letter-spacing: 3px;
-            }
+.links-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-gap: var(--grid-gap);
+}
 
-            #exampleList div:first-of-type h2 {
-                margin-top: 0;
-            }
+.description {
+   min-height: 50px;
+}
 
-            #exampleList .link {
-                text-decoration: none;
-                cursor: pointer;
-                display: block;
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-                padding: 3px var(--margin);
-            }
+.gradient {
+   background: var(--gradient);
+   background-clip: text;
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+}
 
-            #exampleList .selected {
-                font-weight: bold;
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--soft));
-            }
+.button-link {
+   display: inline-block;
+   padding: 12px 30px;
+   background: var(--gradient);
+   color: var(--dark0-text);
+   font-family: 'Fira Sans', sans-serif;
+   font-size: 14px;
+   line-height: 16px;
+   font-weight: 500;
+   margin: 40px 0;
+   border: 0px solid transparent;
+   border-radius: 21px;
+   transition: .3s all;
+   text-decoration: none;
+}
 
-            #exampleList .link:hover {
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--soft));
-            }
+select {
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
+   background: #272D37;
+   color: white;
+   font-size: 14px;
+   line-height: 16px;
+   font-weight: 500;
+   border: 2px solid transparent;
+   border-radius: 3px;
+   padding: 8px 28px 8px 20px;
+   display: inline;
+   font-family: 'Fira Sans', sans-serif;
+   /* width: 50%; */
+   margin: 20px 0;
 
-            #exampleList .filtered {
-                display: none !important;
-            }
+   background-image: linear-gradient(45deg, transparent 50%, white 50%), linear-gradient(135deg, white 50%, transparent 50%),linear-gradient(to right, #272D37, #272D37);
+   background-position:
+    calc(100% - 20px) calc(1em + 0px),
+    calc(100% - 15px) calc(1em + 0px),
+    100% 0;
+   background-size: 5px 5px, 5px 5px, 2.5em 2.5em;
+   background-repeat: no-repeat;
+}
 
-            /*
-            * View Source button
-            */
-            #viewSource {
-                width: 50px;
-                height: 50px;
-                font-size: 22px;
-                border-radius: 50%;
-                font-weight: bold;
-                border: none;
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-                box-shadow:0 0 10px #333;
-                cursor: pointer;
-                transition: all 0.1s;
-                padding: 0 0 1px 1px;
-                user-select: none;
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                margin: var(--margin);
-                background: var(--gradient);
-                text-decoration: none;
-            }
+select:focus {
+   outline: none !important;
+   border:2px solid #193C42;
+   box-shadow: 0 0 5px #193C42;
+}
 
-            #viewSource p {
-                font-size: 15px;
-                font-weight: bold;
-                margin: 0;
-                text-transform: uppercase;
-            }
+.versions-notes {
+   color: grey;
+}
 
-            /*
-            * Filter input block
-            */
+/* Footer */
 
-            .filterBlock {
-                position: relative;
-                margin: 0px 0 15px 0;
-            }
+footer {
+   background: #333942;
+}
 
-            .filterBlock p {
-                margin: 0;
-            }
+.footer {
+   display: flex;
+   padding-top: 60px;
+   padding-bottom: 60px;
+   align-items: center;
+   color: white;
+}
 
-            #filterInput {
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-                width: 100%;
-                box-sizing: border-box;
-                padding: calc(var(--margin) + 7px) 50px calc(var(--margin) + 7px) var(--margin);
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-                font-family: inherit;
-                font-size: 17px;
-                outline: none;
-                border: none;
-            }
+.footer a {
+   color: white;
+   text-decoration: none;
+}
 
-            #filterInput:focus+#magnifier-placeholder {
-                display: none;
-            }
+.footer-title {
+   margin: 0;
+   margin-right: 120px;
+}
 
-            #magnifier-placeholder {
-                position: absolute;
-                top: 22px;
-                left: calc(var(--margin) + 2px);
-                pointer-events: none;
-                font-size: 25px;
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-            }
+/* Animation */
+@keyframes lead-animation {
+   0% {
+      opacity: 0;
+      transform: translateY(20px);
+   }
 
-            #clearFilterButton {
-                text-decoration: none;
-                position: absolute;
-                right: var(--margin);
-                top: 50%;
-                padding: 0;
-                margin-top: -8px;
-                height: 16px;
-                font-size: 30px;
-                color: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-                text-align: center;
-                line-height: 0;
-                background: none;
-                border: none;
-                outline: none;
-                cursor: pointer;
-            }
+   100% {
+      opacity: 1;
+      transform: translateY(0px);
+   }
+}
 
-            #clearFilterButton:hover {
-                opacity: 1;
-            }
+/* Mobile */
+@media only screen and (max-width: 600px) {
 
-            /*
-            * Mobile / Responsive support
-            */
+   .container {
+      padding: 0 20px;
+   }
 
-            #hamburgerMenu {
-                position: absolute;
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--dark));
-                width: 50px;
-                height: 50px;
-                border: none;
-                outline: none;
-                cursor: pointer;
-                z-index: 1
-            }
+   #docs-nav-mobile {
+      display: inline;
+   }
+   #docs-nav {
+      display: none;
+   }
 
-            #hamburgerMenu span,
-            #closeButton span {
-                height: 2px;
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--bright));
-                width: 26px;
-                position: absolute;
-            }
+   nav .nav-item {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      transition: .1s all;
+      font-weight: 400;
+      font-size: 14px;
+      text-transform: uppercase;
+   }
 
-            #closeButton span {
-                background: hsl(var(--color1-hue), var(--color1-saturation), var(--intermediate));
-            }
+   .features {
+      grid-template-columns: 1fr;
+   }
 
-            #hamburgerMenu span {
-                left: 11px;
-                top: 14px;
-            }
+   .links-grid {
+      grid-template-columns: 1fr;
+   }
 
-            #hamburgerMenu span:nth-child(1) {
-                top: 23px;
-            }
+   .footer {
+      flex-direction: column;
+      align-items: flex-start;
+      padding-top: 60px;
+      padding-bottom: 60px;
+   }
 
-            #hamburgerMenu span:nth-child(2) {
-                top: 32px;
-            }
+   .footer-title {
+      margin-bottom: 20px;
+   }
+}
 
-        </style>
-    </head>
 
-    <body>
-        <button id="hamburgerMenu" href="#">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        <div id="navPanel" class="collapsed">
-            <div id="titleBar">
-                <a href="http://harp.gl">
-                    <h1 id="title">harp.gl</h1>
-                </a>
-                <a id=documentation title="Documentation"
-                    href=https://www.harp.gl/docs/master/doc/> <svg viewBox="0 0 23 60"
-                    height="25" width="23">
-                    <path
-                        d="M -1.6965819,8.2701467 V 35.224035 c 0.0283,0.847295 0.648697,1.588424 1.318981,1.5861 0.64875499,0.0046 1.15590999,-0.400431 1.463019,-0.762541 l 4.217,-7.516842 4.217,7.517911 c 0.327,0.582909 0.9389999,0.856715 1.5499999,0.734786 0.045,-0.0086 0.089,-0.0021 0.134,-0.01497 0.657,-0.195729 1.099,-0.816072 1.099,-1.54444 V 8.2701467 Z" />
-                    <path
-                        style="fill:none;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
-                        d="M 31.544194,1.8446699 31.499,58.375 H -4.4999998 v -47 H 31.499" />
-                    <path
-                        style="fill:none;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
-                        d="m -4.5,58.375 c -2.8186816,0.0081 -5.078877,-1.790886 -5.125,-4.3545 V 6.6875 C -9.580216,4.4229047 -7.1760603,2.001032 -4.6438447,1.9924176 L 31.544194,1.8446699" />
-                    <path
-                        style="fill:none;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
-                        d="m -9.625,6.6875 c 0.02296,2.96301 1.8301551,4.714336 5.1250002,4.6875" />
-                    </svg>
-                </a>
-                <a id=github title="Visit Harp.gl repository on GitHub"
-                    href=https://github.com/heremaps/harp.gl> <svg
-                    class="octicon octicon-mark-github v-align-middle" height="25"
-                    viewBox="0 0 16 16" version="1.1" aria-hidden="true">
-                    <path
-                        d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z">
-                    </path></svg>
-                </a>
-
-                <button id="closeButton" href="#">
-                    <span></span>
-                    <span></span>
-                </button>
-                <div style="clear:both"></div>
-            </div>
-
-            <div class="filterBlock">
-                <input type="text" id="filterInput">
-                <svg id=magnifier-placeholder viewBox="30 30 110 110" width=20 height=20>
-                    <circle style="stroke-width:15;fill:none;stroke:#252c36;" cx="75" cy="75"
-                        r="35" />
-                    <path style="fill:none;stroke:#252c36;stroke-width:15;" d="m 100,100 35,35" />
-                </svg>
-                </input>
-                <button href="#" id="clearFilterButton" style="display:none;">&#215;</button>
-            </div>
-            <div id="exampleList"></div>
-        </div>
-
-        <iframe id="exampleFrame" allowfullscreen allowvr onmousewheel=""></iframe>
-        <button id="viewSource" title="View the source code" href=# style="display:none;">
-            <p>&#60;/&#62;</p>
-        </button>
-
-        <script src="example-definitions.js"></script>
-        <script src="example-browser.bundle.js"></script>
-    </body>
-
-</html>
+/*# sourceMappingURL=index.css.map*/</style></head><body><header><canvas id="map"></canvas><div class="container header-container"><nav><div class="logo"></div><div><a id="docs-nav-mobile" href="https://www.harp.gl/docs" class="nav-item">Docs</a> <a id="docs-nav" href="docs" class="nav-item">Documentation</a> <a id="examples-nav" href="examples" class="nav-item">Examples</a> <a id="tutorial-nav" href="https://developer.here.com/tutorials/harpgl" class="nav-item">Tutorial</a> <a href="https://github.com/heremaps/harp.gl" class="nav-item">GitHub</a></div></nav><div class="header-content"><div class="header-title">harp.gl</div><div class="header-desc">3d web map rendering engine</div></div></div></header><div class="container"><div class="features"><div class="feature"><i class="material-icons">computer</i><h2>Web first</h2><div class="subtitle">harp.gl is built on modern web technologies like WebGL and three.js.</div></div><div class="feature"><i class="material-icons">code</i><h2>Open source</h2><div class="subtitle">harp.gl is developed with the community in mind. Feature suggestion or bug report? Let us know on GitHub.</div></div><div class="feature"><i class="material-icons">public</i><h2>Flexible</h2><div class="subtitle">Add any type of datasource such as GeoJSON, vector and raster tiles, or custom objects to the map.</div></div></div></div><div class="links"><div class="container"><div class="links-grid"><div><h1 class="gradient">Documentation</h1><p class="description">Learn how to use the harp.gl api, including information about the different modules, classes, and methods.</p><a target="_blank" class="button-link docs-link" href="">Documentation</a></div><div><h1 class="gradient">Examples</h1><p class="description">Explore and play around with different live examples of harp.gl in action.</p><a target="_blank" class="button-link examples-link" href="">Examples</a></div><div><p><label for="versions">Select the target release</label>:</p><select id="versions" name="versions"></select><p>Please note that latest includes bleeding edge changes. For a more stable build, try the most recent release.</p></div></div></div></div><footer><div class="container footer"><div><h1 class="footer-title">harp.gl</h1></div><div><span>&copy; 2017-<span id="year"></span> <a target="_blank" href="https://here.com">HERE</a></span></div></div></footer></body></html>
